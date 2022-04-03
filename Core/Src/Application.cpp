@@ -9,13 +9,17 @@
 
 Application application = Application();
 
-void Application::usbDataReceived(uint8_t* buf, uint32_t len) {
+Application::Application() : commands() {
+	commands[PingCommand::COMMAND_ID] = new PingCommand();
+}
+
+void Application::usbDataReceived(uint8_t * buf, uint32_t len) {
 	usbBuffer.append(buf, len);
 }
 
 void Application::loopIteration() {
 	do {
-		std::vector<uint8_t>* dataItem = usbBuffer.ingest();
+		std::vector<uint8_t> * dataItem = usbBuffer.ingest();
 		if (dataItem == NULL) {
 			break;
 		}
@@ -23,12 +27,10 @@ void Application::loopIteration() {
 		uint16_t size = *(uint16_t *)&(*dataItem)[0];
 		if (size >= 2) {
 			uint16_t command = *(uint16_t *)&(*dataItem)[2];
+			uint8_t * data = (uint8_t *)&(*dataItem)[4];
 
-			if (command == 1) { // ping
-				uint8_t txBuf[4];
-				((uint16_t*)txBuf)[0] = 2; // size
-				((uint16_t*)txBuf)[1] = 2; // pong
-				while(CDC_Transmit_FS((uint8_t*)txBuf, 4)!=USBD_OK);
+			if (commands[command] != NULL) {
+				commands[command]->receivedCommand(data, size);
 			}
 		}
 
@@ -37,7 +39,7 @@ void Application::loopIteration() {
 	} while(true);
 }
 
-extern "C" void usbDataReceived(uint8_t* buf, uint32_t len) {
+extern "C" void usbDataReceived(uint8_t * buf, uint32_t len) {
 	application.usbDataReceived(buf, len);
 }
 
