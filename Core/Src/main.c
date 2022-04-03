@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -27,6 +28,10 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
+#include <stdlib.h>
+
+#include "usbd_cdc_if.h"
+#include <ApplicationC.h>
 
 /* USER CODE END Includes */
 
@@ -52,13 +57,6 @@ UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
 
-static const int hysteresis = 2;
-static const int max_val = 23;
-
-uint16_t curr_encoder = 0x7fff;
-uint16_t prev_encoder = 0x0000;
-volatile uint8_t transmitting = 0;
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -69,126 +67,11 @@ static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
-int _write(int fd, char* ptr, int len) {
-  HAL_StatusTypeDef hstatus;
-
-  if (fd == STDOUT_FILENO || fd == STDERR_FILENO) {
-    hstatus = HAL_UART_Transmit(&huart1, (uint8_t *) ptr, len, HAL_MAX_DELAY);
-    if (hstatus == HAL_OK)
-      return len;
-    else
-      return EIO;
-  }
-  errno = EBADF;
-  return -1;
-}
-
-void initEncoider(uint16_t initValue) {
-	htim2.Instance->CNT = initValue * hysteresis;
-}
-
-void handleEncoder() {
-  if ((int16_t)htim2.Instance->CNT < 0) {
-	  htim2.Instance->CNT = 0;
-  } else if ((int16_t)htim2.Instance->CNT > max_val * hysteresis) {
-	  htim2.Instance->CNT = max_val * hysteresis;
-  }
-
-  curr_encoder = htim2.Instance->CNT / hysteresis;
-}
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-void delay(uint16_t pwm)
-{
-	if (pwm > 0)
-		return HAL_Delay(1 * pwm);
-}
-
-static void updatePwmIo(uint16_t prescaler, uint16_t period)
-{
-
-  /* USER CODE BEGIN TIM1_Init 0 */
-
-  /* USER CODE END TIM1_Init 0 */
-
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-  TIM_OC_InitTypeDef sConfigOC = {0};
-  TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
-
-  /* USER CODE BEGIN TIM1_Init 1 */
-
-  /* USER CODE END TIM1_Init 1 */
-  htim1.Instance = TIM1;
-  htim1.Init.Prescaler = prescaler - 1;
-  htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim1.Init.Period = period-1;
-  htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim1.Init.RepetitionCounter = 0;
-  htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sConfigOC.OCMode = TIM_OCMODE_PWM1;
-  sConfigOC.Pulse = period / 2;
-  sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
-  sConfigOC.OCNPolarity = TIM_OCNPOLARITY_HIGH;
-  sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
-  sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
-  sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-  if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_DISABLE;
-  sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_DISABLE;
-  sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-  sBreakDeadTimeConfig.DeadTime = 0;
-  sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
-  sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
-  sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
-  if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM1_Init 2 */
-
-  /* USER CODE END TIM1_Init 2 */
-  HAL_TIM_MspPostInit(&htim1);
-
-}
-
-void light_diode(uint16_t timeMs)
-{
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
-	delay(timeMs);
-	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_SET);
-}
-
-void setExpPwm(int16_t pwm)
-{
-	uint16_t period = 2;
-	uint32_t prescaler = (1 << pwm);
-
-	if (pwm > 16)
-	{
-		prescaler = (1 << 16);
-		period = 2 * (1 << pwm) / (1 << 16);
-	}
-	HAL_TIM_PWM_Stop(&htim1, TIM_CHANNEL_1);
-	updatePwmIo(prescaler, period);
-	HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-}
 
 /* USER CODE END 0 */
 
@@ -223,71 +106,21 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM2_Init();
   MX_USART1_UART_Init();
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-
-  HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-  HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
-//  HAL_TIM_Base_Start(&htim2);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  initEncoider(5); // 1.125 MHz
-
   while (1)  {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
 
-	  handleEncoder();
+	  loopIteration();
 
-	  if (curr_encoder != prev_encoder) {
-		  prev_encoder = curr_encoder;
-		  light_diode(10);
-		  setExpPwm(curr_encoder);
-	  }
-
-	  uint32_t freq = 36000000 / (1 << curr_encoder);
-
-	  if (freq < 1000) {
-		  printf("Freq: %luHz\n", freq);
-	  } else if (freq < 1000000) {
-		  uint32_t freq_b = freq % 1000;
-		  uint32_t freq_a = freq / 1000;
-		  printf("Freq: %lu.%lukHz\n", freq_a, freq_b);
-	  } else {
-		  uint32_t freq_b = freq % 1000000;
-		  uint32_t freq_a = freq / 1000000;
-		  printf("Freq: %lu.%luMHz\n", freq_a, freq_b);
-	  }
-
-//	  printf("Freq: %luMHz, curr_encoder: %u\n", freq, curr_encoder);
-
-
-
-//	  int16_t new_encoder = ((int16_t)htim2.Instance->CNT);
-//
-//	  if (new_encoder > max_val * hysteresis) {
-//		  new_encoder = max_val * hysteresis;
-//		  htim2.Instance->CNT = max_val * hysteresis;
-//	  } else if(new_encoder < 0) {
-//		  new_encoder = 0;
-//		  htim2.Instance->CNT = 0;
-//	  }
-//
-//	  int diff = new_encoder - curr_encoder;
-//
-//	  if (diff > hysteresis || diff < -hysteresis) {
-//		  curr_encoder = new_encoder;
-//
-//		  int16_t pwm = curr_encoder / hysteresis;
-//
-//		  setPWM(pwm);
-//	  }
-//
-//	  light_diode(curr_encoder);
   }
   /* USER CODE END 3 */
 }
@@ -300,6 +133,7 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -310,7 +144,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL6;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -324,7 +158,13 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
+  PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLL;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }
