@@ -10,7 +10,9 @@
 Application application = Application();
 
 Application::Application() : commands() {
-	commands[PingCommand::COMMAND_ID] = new PingCommand();
+	commands[PING_COMMAND] = new PingCommand();
+	commands[WRITE_PIN] = new WritePin();
+	commands[READ_PIN] = new ReadPin();
 }
 
 void Application::usbDataReceived(uint8_t * buf, uint32_t len) {

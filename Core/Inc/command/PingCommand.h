@@ -14,8 +14,6 @@
 class PingCommand: public GenericCommand
 {
 public:
-	static const int COMMAND_ID = 1;
-
 	virtual ~PingCommand() {};
 	virtual void receivedCommand(uint8_t * data, uint16_t size) {
 		sendPong();
@@ -26,8 +24,8 @@ private:
 	{
 		uint8_t txBuf[4];
 		((uint16_t*) (txBuf))[0] = 2; // size
-		((uint16_t*) (txBuf))[1] = 2; // pong
-		while (CDC_Transmit_FS((uint8_t*) (txBuf), 4) != USBD_OK);
+		((uint16_t*) (txBuf))[1] = PONG_COMMAND; // pong
+		sendResponse(txBuf, 4);
 	}
 };
 

@@ -120,7 +120,6 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 	  loopIteration();
-
   }
   /* USER CODE END 3 */
 }

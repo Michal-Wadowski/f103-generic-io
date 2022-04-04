@@ -13,6 +13,8 @@
 #include <string.h>
 #include "command/GenericCommand.h"
 #include "command/PingCommand.h"
+#include "command/WritePin.h"
+#include "command/ReadPin.h"
 
 class Application
 {
