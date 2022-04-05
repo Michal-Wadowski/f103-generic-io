@@ -34,6 +34,8 @@ public:
 			case 4:
 				port = GPIOE;
 				break;
+			default:
+				return;
 			}
 
 			if (port != NULL) {
