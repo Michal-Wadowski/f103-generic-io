@@ -13,6 +13,7 @@ Application::Application() : commands() {
 	commands[PING_COMMAND] = new PingCommand();
 	commands[WRITE_PIN] = new WritePin();
 	commands[READ_PIN] = new ReadPin();
+	commands[GPIO_INIT] = new GPIOInit();
 }
 
 void Application::usbDataReceived(uint8_t * buf, uint32_t len) {

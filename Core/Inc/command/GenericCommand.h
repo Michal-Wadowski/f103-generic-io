@@ -16,7 +16,9 @@ typedef enum {
 	WRITE_PIN,
 	WRITE_PIN_OK,
 	READ_PIN,
-	READ_PIN_RESULT
+	READ_PIN_RESULT,
+	GPIO_INIT,
+	GPIO_INIT_OK
 } CommandIds;
 
 class GenericCommand

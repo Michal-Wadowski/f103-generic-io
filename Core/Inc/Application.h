@@ -15,6 +15,7 @@
 #include "command/PingCommand.h"
 #include "command/WritePin.h"
 #include "command/ReadPin.h"
+#include "command/GPIOInit.h"
 
 class Application
 {
