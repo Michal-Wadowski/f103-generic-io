@@ -15,43 +15,44 @@ class GPIOInit: public GenericCommand
 {
 public:
 	virtual ~GPIOInit() {};
-	virtual void receivedCommand(uint8_t * data, uint16_t size) {
-		if (size == 15+2) {
-			GPIO_TypeDef * port;
-			switch (data[0]) {
-			case 0:
-				port = GPIOA;
-				break;
-			case 1:
-				port = GPIOB;
-				break;
-			case 2:
-				port = GPIOC;
-				break;
-			case 3:
-				port = GPIOD;
-				break;
-			case 4:
-				port = GPIOE;
-				break;
-			default:
-				return;
-			}
+	virtual void receivedCommand(BytesReader * bytesReader) {
 
-			if (port != NULL) {
-				uint16_t pin = *((uint16_t*)&data[1]);
-				uint32_t mode = *((uint32_t*)&data[3]);
-				uint32_t pull = *((uint32_t*)&data[7]);
-				uint32_t speed = *((uint32_t*)&data[11]);
+		GPIO_TypeDef * port;
+		switch (bytesReader->popUInt8()) {
+		case 0:
+			port = GPIOA;
+			break;
+		case 1:
+			port = GPIOB;
+			break;
+		case 2:
+			port = GPIOC;
+			break;
+		case 3:
+			port = GPIOD;
+			break;
+		case 4:
+			port = GPIOE;
+			break;
+		default:
+			return;
+		}
 
-				GPIO_InitTypeDef GPIO_InitStruct = {pin, mode, pull, speed};
+		if (port != NULL) {
+			uint16_t pin = bytesReader->popUInt16();
+			uint32_t mode = bytesReader->popUInt32();
+			uint32_t pull = bytesReader->popUInt32();
+			uint32_t speed = bytesReader->popUInt32();
 
+			GPIO_InitTypeDef GPIO_InitStruct = {pin, mode, pull, speed};
 
+			if (!bytesReader->isOverrun()) {
 				HAL_GPIO_Init(port, &GPIO_InitStruct);
 
 				sendOk();
 			}
 		}
+
 	}
 
 	void sendOk()

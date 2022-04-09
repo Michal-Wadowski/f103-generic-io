@@ -7,17 +7,31 @@
 #include <string.h>
 
 #include <list>
-#include <vector>
 
+#include "command/BytesReader.h"
 
 class UsbBuffer {
 public:
-	void append(uint8_t* buf, uint32_t len);
-	std::vector<uint8_t>* ingest();
+	void append(uint8_t* buf, uint32_t len) {
+		samples.push_back(new BytesReader(buf, len));
+	}
 
-	int size();
+	BytesReader * ingest() {
+		if (samples.size() > 0) {
+			BytesReader * piece = *samples.begin();
+			samples.pop_front();
+			return piece;
+		}
+		return NULL;
+	}
+
+	int size() {
+		return samples.size();
+	}
+
+
 protected:
-	std::list<std::vector<uint8_t>*> samples;
+	std::list<BytesReader*> samples;
 };
 
 #endif

@@ -67,7 +67,6 @@ Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
 Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/usbd_cdc.c
 
 CPP_SOURCES =  \
-Core/Src/UsbBuffer.cpp \
 Core/Src/Application.cpp
 
 # ASM sources

@@ -15,35 +15,35 @@ class WritePin: public GenericCommand
 {
 public:
 	virtual ~WritePin() {};
-	virtual void receivedCommand(uint8_t * data, uint16_t size) {
-		if (size == 4+2) {
-			GPIO_TypeDef * port;
-			switch (data[0]) {
-			case 0:
-				port = GPIOA;
-				break;
-			case 1:
-				port = GPIOB;
-				break;
-			case 2:
-				port = GPIOC;
-				break;
-			case 3:
-				port = GPIOD;
-				break;
-			case 4:
-				port = GPIOE;
-				break;
-			default:
-				return;
-			}
+	virtual void receivedCommand(BytesReader * bytesReader) {
 
-			if (port != NULL) {
-				uint16_t pin = *((uint16_t*)&data[1]);
-				GPIO_PinState set = data[3] ? GPIO_PIN_SET : GPIO_PIN_RESET;
+		GPIO_TypeDef * port;
+		switch (bytesReader->popUInt8()) {
+		case 0:
+			port = GPIOA;
+			break;
+		case 1:
+			port = GPIOB;
+			break;
+		case 2:
+			port = GPIOC;
+			break;
+		case 3:
+			port = GPIOD;
+			break;
+		case 4:
+			port = GPIOE;
+			break;
+		default:
+			return;
+		}
 
+		if (port != NULL) {
+			uint16_t pin = bytesReader->popUInt16();
+			GPIO_PinState set = bytesReader->popUInt8() ? GPIO_PIN_SET : GPIO_PIN_RESET;
+
+			if (!bytesReader->isOverrun()) {
 				HAL_GPIO_WritePin(port, pin, set);
-
 				sendOk();
 			}
 		}

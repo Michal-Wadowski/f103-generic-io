@@ -25,7 +25,7 @@ class GenericCommand
 {
 public:
 	virtual ~GenericCommand() {};
-	virtual void receivedCommand(uint8_t * data, uint16_t size) = 0;
+	virtual void receivedCommand(BytesReader * bytesReader) = 0;
 
 protected:
 	virtual void sendResponse(uint8_t * data, uint16_t size) {

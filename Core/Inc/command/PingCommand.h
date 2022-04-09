@@ -15,7 +15,7 @@ class PingCommand: public GenericCommand
 {
 public:
 	virtual ~PingCommand() {};
-	virtual void receivedCommand(uint8_t * data, uint16_t size) {
+	virtual void receivedCommand(BytesReader * bytesReader) {
 		sendPong();
 	};
 
