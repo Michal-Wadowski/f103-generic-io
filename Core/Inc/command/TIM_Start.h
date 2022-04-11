@@ -31,6 +31,11 @@ public:
 					HAL_TIM_PWM_Start(htim[timer], channel);
 					sendOk();
 				}
+			} else if (mode == ENCODER) {
+				if (!bytesReader->isOverrun()) {
+					HAL_TIM_Encoder_Start(htim[timer], channel);
+					sendOk();
+				}
 			}
 		}
 	}

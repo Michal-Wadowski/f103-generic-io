@@ -27,9 +27,42 @@ public:
 			if (mode == PWM) {
 				if (!bytesReader->isOverrun()) {
 					HAL_TIM_PWM_DeInit(htim[timer]);
+
+					if (htim[timer]->Instance == TIM1) {
+						__HAL_RCC_TIM1_CLK_DISABLE();
+					} else if (htim[timer]->Instance == TIM2) {
+						__HAL_RCC_TIM2_CLK_DISABLE();
+					} else if (htim[timer]->Instance == TIM3) {
+						__HAL_RCC_TIM3_CLK_DISABLE();
+					} else if (htim[timer]->Instance == TIM4) {
+						__HAL_RCC_TIM4_CLK_DISABLE();
+					}
+
+
 					delete htim[timer];
 					htim[timer] = NULL;
 					sendOk();
+				}
+			} else {
+				if (mode == ENCODER) {
+					if (!bytesReader->isOverrun()) {
+						HAL_TIM_Encoder_DeInit(htim[timer]);
+
+						if (htim[timer]->Instance == TIM1) {
+							__HAL_RCC_TIM1_CLK_DISABLE();
+						} else if (htim[timer]->Instance == TIM2) {
+							__HAL_RCC_TIM2_CLK_DISABLE();
+						} else if (htim[timer]->Instance == TIM3) {
+							__HAL_RCC_TIM3_CLK_DISABLE();
+						} else if (htim[timer]->Instance == TIM4) {
+							__HAL_RCC_TIM4_CLK_DISABLE();
+						}
+
+
+						delete htim[timer];
+						htim[timer] = NULL;
+						sendOk();
+					}
 				}
 			}
 		}

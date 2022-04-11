@@ -9,7 +9,8 @@
 #define CORE_INC_COMMAND_TIM_COMMON_H_
 
 enum TIM_Mode {
-	PWM
+	PWM,
+	ENCODER
 };
 
 #endif /* CORE_INC_COMMAND_TIM_COMMON_H_ */

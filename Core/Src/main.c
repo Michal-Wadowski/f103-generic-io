@@ -61,7 +61,6 @@ UART_HandleTypeDef huart1;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void peripheralClocksEnable(void);
-static void MX_TIM2_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -102,7 +101,6 @@ int main(void)
   /* Initialize all configured peripherals */
   peripheralClocksEnable();
 
-  MX_TIM2_Init();
   MX_USART1_UART_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
@@ -170,56 +168,6 @@ void SystemClock_Config(void)
 }
 
 
-/**
-  * @brief TIM2 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_TIM2_Init(void)
-{
-
-  /* USER CODE BEGIN TIM2_Init 0 */
-
-  /* USER CODE END TIM2_Init 0 */
-
-  TIM_Encoder_InitTypeDef sConfig = {0};
-  TIM_MasterConfigTypeDef sMasterConfig = {0};
-
-  /* USER CODE BEGIN TIM2_Init 1 */
-
-  /* USER CODE END TIM2_Init 1 */
-  htim[1] = malloc(sizeof(TIM_HandleTypeDef));
-  memset(htim[1], 0, sizeof(TIM_HandleTypeDef));
-  htim[1]->Instance = TIM2;
-  htim[1]->Init.Prescaler = 0;
-  htim[1]->Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim[1]->Init.Period = 0xffff;
-  htim[1]->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-  htim[1]->Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
-  sConfig.EncoderMode = TIM_ENCODERMODE_TI1;
-  sConfig.IC1Polarity = TIM_ICPOLARITY_RISING;
-  sConfig.IC1Selection = TIM_ICSELECTION_DIRECTTI;
-  sConfig.IC1Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC1Filter = 0;
-  sConfig.IC2Polarity = TIM_ICPOLARITY_RISING;
-  sConfig.IC2Selection = TIM_ICSELECTION_DIRECTTI;
-  sConfig.IC2Prescaler = TIM_ICPSC_DIV1;
-  sConfig.IC2Filter = 0;
-  if (HAL_TIM_Encoder_Init(htim[1], &sConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-  if (HAL_TIMEx_MasterConfigSynchronization(htim[1], &sMasterConfig) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN TIM2_Init 2 */
-
-  /* USER CODE END TIM2_Init 2 */
-
-}
 
 /**
   * @brief USART1 Initialization Function
@@ -266,8 +214,8 @@ static void peripheralClocksEnable(void)
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
-  __HAL_RCC_TIM1_CLK_ENABLE();
-  __HAL_RCC_TIM2_CLK_ENABLE();
+//  __HAL_RCC_TIM1_CLK_ENABLE();
+//  __HAL_RCC_TIM2_CLK_ENABLE();
 }
 
 /* USER CODE BEGIN 4 */
