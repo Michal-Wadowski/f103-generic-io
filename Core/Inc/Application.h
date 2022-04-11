@@ -21,6 +21,7 @@
 #include "command/TIM_Init.h"
 #include "command/TIM_DeInit.h"
 #include "command/TIM_ConfigChannel.h"
+#include "command/TIM_InstanceUpdate.h"
 
 class Application
 {
@@ -36,6 +37,7 @@ public:
 		commands[TIM_INIT] = new TIM_Init();
 		commands[TIM_DEINIT] = new TIM_DeInit();
 		commands[TIM_CONFIG_CHANNEL] = new TIM_ConfigChannel();
+		commands[TIM_INSTANCE_UPDATE] = new TIM_InstanceUpdate();
 	}
 
 	void usbDataReceived(uint8_t * buf, uint32_t len)
