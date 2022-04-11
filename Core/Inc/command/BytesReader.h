@@ -12,7 +12,9 @@
 
 class BytesReader {
 public:
-	BytesReader(uint8_t * data, uint32_t length) : index(0), data(data), length(length), overrun(false) {}
+	BytesReader(uint8_t * data, uint32_t length) : index(0), length(length), overrun(false) {
+		memcpy(this->data, data, length);
+	}
 
 	uint32_t size() {
 		return length;
@@ -65,7 +67,7 @@ public:
 
 private:
 	uint32_t index;
-	uint8_t * data;
+	uint8_t  data[64];
 	uint32_t length;
 	bool overrun;
 };
