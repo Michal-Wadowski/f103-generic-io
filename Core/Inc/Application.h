@@ -12,10 +12,15 @@
 #include "usbd_cdc_if.h"
 #include <string.h>
 #include "command/GenericCommand.h"
+#include "command/GPIOInit.h"
 #include "command/PingCommand.h"
 #include "command/WritePin.h"
 #include "command/ReadPin.h"
-#include "command/GPIOInit.h"
+#include "command/TIM_Start.h"
+#include "command/TIM_Stop.h"
+#include "command/TIM_Init.h"
+#include "command/TIM_DeInit.h"
+#include "command/TIM_ConfigChannel.h"
 
 class Application
 {
@@ -26,6 +31,11 @@ public:
 		commands[WRITE_PIN] = new WritePin();
 		commands[READ_PIN] = new ReadPin();
 		commands[GPIO_INIT] = new GPIOInit();
+		commands[TIM_START] = new TIM_Start();
+		commands[TIM_STOP] = new TIM_Stop();
+		commands[TIM_INIT] = new TIM_Init();
+		commands[TIM_DEINIT] = new TIM_DeInit();
+		commands[TIM_CONFIG_CHANNEL] = new TIM_ConfigChannel();
 	}
 
 	void usbDataReceived(uint8_t * buf, uint32_t len)

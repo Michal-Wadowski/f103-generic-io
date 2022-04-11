@@ -53,7 +53,7 @@ public:
 	{
 		uint8_t txBuf[4];
 		((uint16_t*) (txBuf))[0] = 2; // size
-		((uint16_t*) (txBuf))[1] = WRITE_PIN_OK;
+		((uint16_t*) (txBuf))[1] = WRITE_PIN_RESPONSE;
 		sendResponse(txBuf, 4);
 	}
 };

@@ -59,7 +59,7 @@ public:
 	{
 		uint8_t txBuf[4];
 		((uint16_t*) (txBuf))[0] = 2; // size
-		((uint16_t*) (txBuf))[1] = GPIO_INIT_OK;
+		((uint16_t*) (txBuf))[1] = GPIO_INIT_RESPONSE;
 		sendResponse(txBuf, 4);
 	}
 };

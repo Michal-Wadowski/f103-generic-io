@@ -52,7 +52,7 @@ public:
 	{
 		uint8_t txBuf[5];
 		((uint16_t*) (txBuf))[0] = 3; // size
-		((uint16_t*) (txBuf))[1] = READ_PIN_RESULT;
+		((uint16_t*) (txBuf))[1] = READ_PIN_RESPONSE;
 		txBuf[4] = result;
 		sendResponse(txBuf, 5);
 	}
