@@ -18,7 +18,7 @@ typedef enum {
 	SET_COMPARE,
 	SET_AUTORELOAD,
 	SET_COUNTER
-} Command;
+} InstanceUpdateCommand;
 
 class TIM_InstanceUpdate: public GenericCommand
 {
@@ -30,7 +30,7 @@ public:
 
 		if (timer >= 0 && timer <= 4 && htim[timer] != NULL) {
 
-			Command command = (Command)bytesReader->popUInt8();
+			InstanceUpdateCommand command = (InstanceUpdateCommand)bytesReader->popUInt8();
 
 			uint8_t channel;
 			uint32_t value;
