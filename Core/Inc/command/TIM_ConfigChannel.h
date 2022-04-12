@@ -8,16 +8,12 @@
 #ifndef CORE_SRC_COMMAND_TIM_CONFIGCHANNEL_H_
 #define CORE_SRC_COMMAND_TIM_CONFIGCHANNEL_H_
 
-#include "GenericCommand.h"
-#include "usbd_cdc_if.h"
+#include "GenericTimer.h"
 
-extern TIM_HandleTypeDef * htim[4];
-
-class TIM_ConfigChannel: public GenericCommand
+class TIM_ConfigChannel: public GenericTimer
 {
 public:
-	virtual ~TIM_ConfigChannel() {};
-	virtual void receivedCommand(BytesReader * bytesReader) {
+	static void receivedCommand(BytesReader * bytesReader) {
 		TIM_Mode mode = (TIM_Mode)bytesReader->popUInt8();
 		uint8_t timer = bytesReader->popUInt8();
 		uint8_t channel = bytesReader->popUInt8();
@@ -32,7 +28,7 @@ public:
 		uint32_t ocIdleState = bytesReader->popUInt32();
 		uint32_t ocnIdleState = bytesReader->popUInt32();
 
-		if (timer >= 0 && timer <= 4 && htim[timer] != NULL) {
+		if (timer >= 0 && timer <= 4 && htimEnabled[timer]) {
 			if (mode == PWM) {
 				if (!bytesReader->isOverrun()) {
 
@@ -44,21 +40,13 @@ public:
 					sConfigOC.OCFastMode = ocFastMode;
 					sConfigOC.OCIdleState = ocIdleState;
 					sConfigOC.OCNIdleState = ocnIdleState;
-					HAL_TIM_PWM_ConfigChannel(htim[timer], &sConfigOC, channel);
+					HAL_TIM_PWM_ConfigChannel(&htim[timer], &sConfigOC, channel);
 
 
-					sendOk();
+					sendOk(TIM_CONFIG_CHANNEL_RESPONSE);
 				}
 			}
 		}
-	}
-
-	void sendOk()
-	{
-		uint8_t txBuf[4];
-		((uint16_t*) (txBuf))[0] = 2; // size
-		((uint16_t*) (txBuf))[1] = TIM_CONFIG_CHANNEL_RESPONSE;
-		sendResponse(txBuf, 4);
 	}
 };
 

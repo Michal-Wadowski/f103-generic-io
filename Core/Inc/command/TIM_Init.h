@@ -8,20 +8,16 @@
 #ifndef CORE_SRC_COMMAND_TIM_INIT_H_
 #define CORE_SRC_COMMAND_TIM_INIT_H_
 
-#include "GenericCommand.h"
-#include "usbd_cdc_if.h"
+#include "GenericTimer.h"
 
-extern TIM_HandleTypeDef * htim[4];
-
-class TIM_Init: public GenericCommand
+class TIM_Init: public GenericTimer
 {
 public:
-	virtual ~TIM_Init() {};
-	virtual void receivedCommand(BytesReader * bytesReader) {
+	static void receivedCommand(BytesReader * bytesReader) {
 		TIM_Mode mode = (TIM_Mode)bytesReader->popUInt8();
 		uint8_t timer = bytesReader->popUInt8();
 
-		if (timer >= 0 && timer <= 4 && htim[timer] == NULL) {
+		if (timer >= 0 && timer <= 4 && !htimEnabled[timer]) {
 
 			if (mode == PWM) {
 				uint32_t prescaler = bytesReader->popUInt32();
@@ -32,39 +28,39 @@ public:
 				uint32_t autoReloadPreload = bytesReader->popUInt32();
 
 				if (!bytesReader->isOverrun()) {
-					htim[timer] = new TIM_HandleTypeDef();
-					memset(htim[timer], 0, sizeof(TIM_HandleTypeDef));
+					memset(&htim[timer], 0, sizeof(TIM_HandleTypeDef));
+					htimEnabled[timer] = 1;
 
 					switch (timer) {
 					case 0:
-						htim[timer]->Instance = TIM1;
+						htim[timer].Instance = TIM1;
 						__HAL_RCC_TIM1_CLK_ENABLE();
 						break;
 					case 1:
-						htim[timer]->Instance = TIM2;
+						htim[timer].Instance = TIM2;
 						__HAL_RCC_TIM2_CLK_ENABLE();
 						break;
 					case 2:
-						htim[timer]->Instance = TIM3;
+						htim[timer].Instance = TIM3;
 						__HAL_RCC_TIM3_CLK_ENABLE();
 						break;
 					case 3:
-						htim[timer]->Instance = TIM4;
+						htim[timer].Instance = TIM4;
 						__HAL_RCC_TIM4_CLK_ENABLE();
 						break;
 					default:
 						return;
 					}
 
-					htim[timer]->Init.Prescaler = prescaler;
-					htim[timer]->Init.CounterMode = counterMode;
-					htim[timer]->Init.Period = period;
-					htim[timer]->Init.ClockDivision = clockDivision;
-					htim[timer]->Init.RepetitionCounter = repetitionCounter;
-					htim[timer]->Init.AutoReloadPreload = autoReloadPreload;
-					HAL_TIM_PWM_Init(htim[timer]);
+					htim[timer].Init.Prescaler = prescaler;
+					htim[timer].Init.CounterMode = counterMode;
+					htim[timer].Init.Period = period;
+					htim[timer].Init.ClockDivision = clockDivision;
+					htim[timer].Init.RepetitionCounter = repetitionCounter;
+					htim[timer].Init.AutoReloadPreload = autoReloadPreload;
+					HAL_TIM_PWM_Init(&htim[timer]);
 
-					sendOk();
+					sendOk(TIM_INIT_RESPONSE);
 				}
 			} else if (mode == ENCODER) {
 				TIM_Encoder_InitTypeDef encoderConfig = {0};
@@ -87,49 +83,41 @@ public:
 				encoderConfig.IC2Filter = bytesReader->popUInt32();
 
 				if (!bytesReader->isOverrun()) {
-					htim[timer] = new TIM_HandleTypeDef();
-					memset(htim[timer], 0, sizeof(TIM_HandleTypeDef));
+					memset(&htim[timer], 0, sizeof(TIM_HandleTypeDef));
+					htimEnabled[timer] = 1;
 
 					switch (timer) {
 					case 0:
-						htim[timer]->Instance = TIM1;
+						htim[timer].Instance = TIM1;
 						__HAL_RCC_TIM1_CLK_ENABLE();
 						break;
 					case 1:
-						htim[timer]->Instance = TIM2;
+						htim[timer].Instance = TIM2;
 						__HAL_RCC_TIM2_CLK_ENABLE();
 						break;
 					case 2:
-						htim[timer]->Instance = TIM3;
+						htim[timer].Instance = TIM3;
 						__HAL_RCC_TIM3_CLK_ENABLE();
 						break;
 					case 3:
-						htim[timer]->Instance = TIM4;
+						htim[timer].Instance = TIM4;
 						__HAL_RCC_TIM4_CLK_ENABLE();
 						break;
 					default:
 						return;
 					}
 
-					htim[timer]->Init.Prescaler = prescaler;
-					htim[timer]->Init.CounterMode = counterMode;
-					htim[timer]->Init.Period = period;
-					htim[timer]->Init.ClockDivision = clockDivision;
-					htim[timer]->Init.AutoReloadPreload = autoReloadPreload;
-					HAL_TIM_Encoder_Init(htim[timer], &encoderConfig);
+					htim[timer].Init.Prescaler = prescaler;
+					htim[timer].Init.CounterMode = counterMode;
+					htim[timer].Init.Period = period;
+					htim[timer].Init.ClockDivision = clockDivision;
+					htim[timer].Init.AutoReloadPreload = autoReloadPreload;
+					HAL_TIM_Encoder_Init(&htim[timer], &encoderConfig);
 
-					sendOk();
+					sendOk(TIM_INIT_RESPONSE);
 				}
 			}
 		}
-	}
-
-	void sendOk()
-	{
-		uint8_t txBuf[4];
-		((uint16_t*) (txBuf))[0] = 2; // size
-		((uint16_t*) (txBuf))[1] = TIM_INIT_RESPONSE;
-		sendResponse(txBuf, 4);
 	}
 };
 

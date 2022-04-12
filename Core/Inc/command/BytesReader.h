@@ -12,6 +12,8 @@
 
 class BytesReader {
 public:
+	BytesReader() {}
+
 	BytesReader(uint8_t * data, uint32_t length) : index(0), length(length), overrun(false) {
 		memcpy(this->data, data, length);
 	}

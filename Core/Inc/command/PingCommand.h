@@ -14,18 +14,14 @@
 class PingCommand: public GenericCommand
 {
 public:
-	virtual ~PingCommand() {};
-	virtual void receivedCommand(BytesReader * bytesReader) {
+	static void receivedCommand(BytesReader * bytesReader) {
 		sendPong();
 	};
 
 private:
-	void sendPong()
+	static void sendPong()
 	{
-		uint8_t txBuf[4];
-		((uint16_t*) (txBuf))[0] = 2; // size
-		((uint16_t*) (txBuf))[1] = PONG_COMMAND; // pong
-		sendResponse(txBuf, 4);
+		sendOk(PONG_COMMAND);
 	}
 };
 

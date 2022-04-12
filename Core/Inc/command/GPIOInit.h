@@ -14,8 +14,7 @@
 class GPIOInit: public GenericCommand
 {
 public:
-	virtual ~GPIOInit() {};
-	virtual void receivedCommand(BytesReader * bytesReader) {
+	static void receivedCommand(BytesReader * bytesReader) {
 
 		GPIO_TypeDef * port;
 		switch (bytesReader->popUInt8()) {
@@ -49,19 +48,12 @@ public:
 			if (!bytesReader->isOverrun()) {
 				HAL_GPIO_Init(port, &GPIO_InitStruct);
 
-				sendOk();
+				sendOk(GPIO_INIT_RESPONSE);
 			}
 		}
 
 	}
 
-	void sendOk()
-	{
-		uint8_t txBuf[4];
-		((uint16_t*) (txBuf))[0] = 2; // size
-		((uint16_t*) (txBuf))[1] = GPIO_INIT_RESPONSE;
-		sendResponse(txBuf, 4);
-	}
 };
 
 #endif /* CORE_SRC_COMMAND_GPIOINIT_H_ */

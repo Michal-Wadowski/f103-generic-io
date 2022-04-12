@@ -14,8 +14,7 @@
 class WritePin: public GenericCommand
 {
 public:
-	virtual ~WritePin() {};
-	virtual void receivedCommand(BytesReader * bytesReader) {
+	static void receivedCommand(BytesReader * bytesReader) {
 
 		GPIO_TypeDef * port;
 		switch (bytesReader->popUInt8()) {
@@ -44,17 +43,9 @@ public:
 
 			if (!bytesReader->isOverrun()) {
 				HAL_GPIO_WritePin(port, pin, set);
-				sendOk();
+				sendOk(WRITE_PIN_RESPONSE);
 			}
 		}
-	}
-
-	void sendOk()
-	{
-		uint8_t txBuf[4];
-		((uint16_t*) (txBuf))[0] = 2; // size
-		((uint16_t*) (txBuf))[1] = WRITE_PIN_RESPONSE;
-		sendResponse(txBuf, 4);
 	}
 };
 

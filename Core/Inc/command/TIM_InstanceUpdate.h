@@ -8,11 +8,7 @@
 #ifndef CORE_SRC_COMMAND_TIM_INSTANCEUPDATE_H_
 #define CORE_SRC_COMMAND_TIM_INSTANCEUPDATE_H_
 
-#include "GenericCommand.h"
-#include "usbd_cdc_if.h"
-#include "TIM_Common.h"
-
-extern TIM_HandleTypeDef * htim[4];
+#include "GenericTimer.h"
 
 typedef enum {
 	SET_COMPARE,
@@ -20,15 +16,14 @@ typedef enum {
 	SET_COUNTER
 } InstanceUpdateCommand;
 
-class TIM_InstanceUpdate: public GenericCommand
+class TIM_InstanceUpdate: public GenericTimer
 {
 public:
-	virtual ~TIM_InstanceUpdate() {};
-	virtual void receivedCommand(BytesReader * bytesReader) {
+	static void receivedCommand(BytesReader * bytesReader) {
 
 		uint8_t timer = bytesReader->popUInt8();
 
-		if (timer >= 0 && timer <= 4 && htim[timer] != NULL) {
+		if (timer >= 0 && timer <= 4 && htimEnabled[timer]) {
 
 			InstanceUpdateCommand command = (InstanceUpdateCommand)bytesReader->popUInt8();
 
@@ -40,36 +35,28 @@ public:
 				channel = bytesReader->popUInt8();
 				value = bytesReader->popUInt32();
 				if (!bytesReader->isOverrun()) {
-					__HAL_TIM_SET_COMPARE(htim[timer], channel, value);
-					sendOk();
+					__HAL_TIM_SET_COMPARE(&htim[timer], channel, value);
+					sendOk(TIM_INSTANCE_UPDATE_RESPONSE);
 				}
 				break;
 			case SET_AUTORELOAD:
 				value = bytesReader->popUInt32();
 				if (!bytesReader->isOverrun()) {
-					__HAL_TIM_SET_AUTORELOAD(htim[timer], value);
-					sendOk();
+					__HAL_TIM_SET_AUTORELOAD(&htim[timer], value);
+					sendOk(TIM_INSTANCE_UPDATE_RESPONSE);
 				}
 				break;
 			case SET_COUNTER:
 				value = bytesReader->popUInt32();
 				if (!bytesReader->isOverrun()) {
-					__HAL_TIM_SET_COUNTER(htim[timer], value);
-					sendOk();
+					__HAL_TIM_SET_COUNTER(&htim[timer], value);
+					sendOk(TIM_INSTANCE_UPDATE_RESPONSE);
 				}
 				break;
 			default:
 				return;
 			}
 		}
-	}
-
-	void sendOk()
-	{
-		uint8_t txBuf[4];
-		((uint16_t*) (txBuf))[0] = 2; // size
-		((uint16_t*) (txBuf))[1] = TIM_INSTANCE_UPDATE_RESPONSE;
-		sendResponse(txBuf, 4);
 	}
 };
 

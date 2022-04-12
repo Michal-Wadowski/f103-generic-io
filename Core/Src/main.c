@@ -50,7 +50,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-TIM_HandleTypeDef * htim[4] = {};
+
 
 UART_HandleTypeDef huart1;
 

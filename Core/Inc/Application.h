@@ -29,17 +29,17 @@ class Application
 public:
 	Application() : commands()
 	{
-		commands[PING_COMMAND] = new PingCommand();
-		commands[WRITE_PIN] = new WritePin();
-		commands[READ_PIN] = new ReadPin();
-		commands[GPIO_INIT] = new GPIOInit();
-		commands[TIM_START] = new TIM_Start();
-		commands[TIM_STOP] = new TIM_Stop();
-		commands[TIM_INIT] = new TIM_Init();
-		commands[TIM_DEINIT] = new TIM_DeInit();
-		commands[TIM_CONFIG_CHANNEL] = new TIM_ConfigChannel();
-		commands[TIM_INSTANCE_UPDATE] = new TIM_InstanceUpdate();
-		commands[TIM_INSTANCE_READ] = new TIM_InstanceRead();
+		commands[PING_COMMAND] = PingCommand::receivedCommand;
+		commands[WRITE_PIN] = WritePin::receivedCommand;
+		commands[READ_PIN] = ReadPin::receivedCommand;
+		commands[GPIO_INIT] = GPIOInit::receivedCommand;
+		commands[TIM_START] = TIM_Start::receivedCommand;
+		commands[TIM_STOP] = TIM_Stop::receivedCommand;
+		commands[TIM_INIT] = TIM_Init::receivedCommand;
+		commands[TIM_DEINIT] = TIM_DeInit::receivedCommand;
+		commands[TIM_CONFIG_CHANNEL] = TIM_ConfigChannel::receivedCommand;
+		commands[TIM_INSTANCE_UPDATE] = TIM_InstanceUpdate::receivedCommand;
+		commands[TIM_INSTANCE_READ] = TIM_InstanceRead::receivedCommand;
 	}
 
 	void usbDataReceived(uint8_t * buf, uint32_t len)
@@ -64,12 +64,10 @@ public:
 					uint16_t command = dataItem->popUInt16();
 					if (commands[command] != NULL)
 					{
-						commands[command]->receivedCommand(dataItem);
+						(*commands[command])(dataItem);
 					}
 				}
 			}
-
-			delete dataItem;
 
 		} while (true);
 	}
@@ -77,7 +75,7 @@ public:
 protected:
 	UsbBuffer usbBuffer;
 
-	GenericCommand * commands[16];
+	receivedCommand commands[16];
 };
 
 

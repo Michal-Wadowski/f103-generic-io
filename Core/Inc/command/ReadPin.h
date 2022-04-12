@@ -13,8 +13,7 @@
 class ReadPin: public GenericCommand
 {
 public:
-	virtual ~ReadPin() {};
-	virtual void receivedCommand(BytesReader * bytesReader) {
+	static void receivedCommand(BytesReader * bytesReader) {
 
 		GPIO_TypeDef * port;
 		switch (bytesReader->popUInt8()) {
@@ -48,13 +47,15 @@ public:
 
 	}
 
-	void sendResult(uint8_t result)
+	static void sendResult(uint8_t result)
 	{
-		uint8_t txBuf[5];
-		((uint16_t*) (txBuf))[0] = 3; // size
-		((uint16_t*) (txBuf))[1] = READ_PIN_RESPONSE;
-		txBuf[4] = result;
-		sendResponse(txBuf, 5);
+		uint8_t txBuf[16];
+
+		BytesWriter bw = BytesWriter(txBuf);
+		bw.pushUInt16(READ_PIN_RESPONSE);
+		bw.pushUInt8(result);
+
+		sendResponse(txBuf, bw.getTotalSize());
 	}
 };
 

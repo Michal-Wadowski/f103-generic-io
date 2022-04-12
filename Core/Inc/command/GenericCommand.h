@@ -9,6 +9,8 @@
 #define CORE_SRC_COMMAND_GENERICCOMMAND_H_
 
 #include "stm32f1xx_hal.h"
+#include "BytesReader.h"
+#include "BytesWriter.h"
 
 typedef enum {
 	PING_COMMAND,
@@ -58,15 +60,23 @@ typedef enum {
 	TIM_INSTANCE_READ_RESPONSE
 } CommandResponseIds;
 
+typedef void (*receivedCommand)(BytesReader * bytesReader);
+
 class GenericCommand
 {
-public:
-	virtual ~GenericCommand() {};
-	virtual void receivedCommand(BytesReader * bytesReader) = 0;
-
 protected:
-	virtual void sendResponse(uint8_t * data, uint16_t size) {
+	static void sendResponse(uint8_t * data, uint16_t size) {
 		while (CDC_Transmit_FS((uint8_t*) (data), size) != USBD_OK);
+	}
+
+	static void sendOk(uint16_t responseCode) {
+		uint8_t txBuf[16];
+
+		BytesWriter bw = BytesWriter(txBuf);
+		bw.pushUInt16(responseCode);
+
+
+		sendResponse(txBuf, bw.getTotalSize());
 	}
 };
 
