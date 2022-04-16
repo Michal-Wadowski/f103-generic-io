@@ -32,19 +32,27 @@ public:
 		*((uint16_t*)(&buffer[0])) = value;
 	}
 
+	uint8_t * getCurrPointer() {
+		return (uint8_t*)(&buffer[getBufferIndex()]);
+	}
+
+	void resize(uint16_t increase) {
+		setSize( getContentSize() + increase);
+	}
+
 	void pushUInt8(uint8_t value) {
 		*((uint8_t*)(&buffer[getBufferIndex()])) = value;
-		setSize( getContentSize() + 1);
+		resize(1);
 	}
 
 	void pushUInt16(uint16_t value) {
 		*((uint16_t*)(&buffer[getBufferIndex()])) = value;
-		setSize( getContentSize() + 2);
+		resize(2);
 	}
 
 	void pushUInt32(uint32_t value) {
 		*((uint32_t*)(&buffer[getBufferIndex()])) = value;
-		setSize( getContentSize() + 4);
+		resize(4);
 	}
 
 

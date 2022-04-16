@@ -9,7 +9,7 @@
 #define CORE_SRC_COMMAND_PINGCOMMAND_H_
 
 #include "GenericCommand.h"
-#include "usbd_cdc_if.h"
+#include "stm32f1xx_hal.h"
 
 class PingCommand: public GenericCommand
 {

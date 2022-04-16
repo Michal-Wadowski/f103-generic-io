@@ -11,6 +11,7 @@
 #include "UsbBuffer.h"
 #include "usbd_cdc_if.h"
 #include <string.h>
+
 #include "command/GenericCommand.h"
 #include "command/GPIOInit.h"
 #include "command/PingCommand.h"
@@ -23,6 +24,13 @@
 #include "command/TIM_ConfigChannel.h"
 #include "command/TIM_InstanceUpdate.h"
 #include "command/TIM_InstanceRead.h"
+#include "command/DMA_Init.h"
+#include "command/ADC_ConfigChannel.h"
+#include "command/ADC_Start.h"
+#include "command/ADC_Init.h"
+#include "command/NVIC_SetPriority.h"
+#include "command/NVIC_EnableIRQ.h"
+#include "command/CommandUtils.h"
 
 class Application
 {
@@ -40,6 +48,13 @@ public:
 		commands[TIM_CONFIG_CHANNEL] = TIM_ConfigChannel::receivedCommand;
 		commands[TIM_INSTANCE_UPDATE] = TIM_InstanceUpdate::receivedCommand;
 		commands[TIM_INSTANCE_READ] = TIM_InstanceRead::receivedCommand;
+		commands[DMA_INIT] = DMA_Init::receivedCommand;
+		commands[ADC_INIT] = ADC_Init::receivedCommand;
+		commands[ADC_CONFIG_CHANNEL] = ADC_ConfigChannel::receivedCommand;
+		commands[ADC_START] = ADC_Start::receivedCommand;
+		commands[NVIC_SET_PRIORITY] = NVIC_SetPriority::receivedCommand;
+		commands[NVIC_ENABLE_IRQ] = NVIC_EnableIRQ::receivedCommand;
+		commands[COMMAND_UTILS] = CommandUtils::receivedCommand;
 	}
 
 	void usbDataReceived(uint8_t * buf, uint32_t len)
@@ -70,6 +85,10 @@ public:
 			}
 
 		} while (true);
+	}
+
+	void adcConversionComplete(ADC_HandleTypeDef* hadc, uint8_t part) {
+		CommandUtils::adcConversionCompleteHandler(hadc, part);
 	}
 
 protected:

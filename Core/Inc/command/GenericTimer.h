@@ -8,7 +8,7 @@
 #ifndef CORE_INC_COMMAND_GENERICTIMER_H_
 #define CORE_INC_COMMAND_GENERICTIMER_H_
 
-#include "usbd_cdc_if.h"
+#include "stm32f1xx_hal.h"
 #include "GenericCommand.h"
 
 extern TIM_HandleTypeDef htim[4];

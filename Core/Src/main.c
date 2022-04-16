@@ -50,11 +50,12 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-
-
+ADC_HandleTypeDef hadc1;
+DMA_HandleTypeDef hdma_adc1;
 UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN PV */
+
 
 /* USER CODE END PV */
 
@@ -64,11 +65,13 @@ static void peripheralClocksEnable(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
+ADC_HandleTypeDef hadc1;
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 
 /* USER CODE END 0 */
 
@@ -109,6 +112,33 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+
+
+  //  HAL_ADC_Start(&hadc1);
+
+//    GPIO_InitTypeDef GPIO_InitStruct;
+//
+//    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+//        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+//        GPIO_InitStruct.Pin = GPIO_PIN_13;
+//
+//        HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+//
+//        while (1)
+//        {
+//  //      	uint32_t value = HAL_ADC_GetValue(&hadc1);
+//
+//        	HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
+//  		  for (int i = 0; i < ((uint16_t*)DataToSend)[0] * 1000; i++);
+//  		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
+//  		  for (int i = 0; i < ((uint16_t*)DataToSend)[0] * 1000; i++);
+//
+//
+//        }
+
+
+
 
   while (1)  {
     /* USER CODE END WHILE */
@@ -156,7 +186,8 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_ADC|RCC_PERIPHCLK_USB;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV4;
   PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_PLL;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
@@ -166,7 +197,6 @@ void SystemClock_Config(void)
   */
   HAL_RCC_EnableCSS();
 }
-
 
 
 /**
@@ -213,9 +243,9 @@ static void peripheralClocksEnable(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
-
-//  __HAL_RCC_TIM1_CLK_ENABLE();
-//  __HAL_RCC_TIM2_CLK_ENABLE();
+  
+  __HAL_RCC_ADC1_CLK_ENABLE();	
+  __HAL_RCC_DMA1_CLK_ENABLE();
 }
 
 /* USER CODE BEGIN 4 */
@@ -233,8 +263,20 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
+
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
   while (1)
   {
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 0);
+	  for (int i = 0; i < 1000000; i++);
+	  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, 1);
+	  for (int i = 0; i < 1000000; i++);
   }
   /* USER CODE END Error_Handler_Debug */
 }

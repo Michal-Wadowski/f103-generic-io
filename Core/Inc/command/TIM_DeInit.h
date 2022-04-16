@@ -9,7 +9,7 @@
 #define CORE_SRC_COMMAND_TIM_DEINIT_H_
 
 #include "GenericTimer.h"
-#include "usbd_cdc_if.h"
+#include "stm32f1xx_hal.h"
 
 class TIM_DeInit: public GenericTimer
 {
