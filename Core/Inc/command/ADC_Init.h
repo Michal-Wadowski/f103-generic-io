@@ -12,9 +12,6 @@
 #include "stm32f1xx_hal.h"
 
 extern ADC_HandleTypeDef hadc1;
-extern DMA_HandleTypeDef hdma_adc1;
-
-extern uint8_t adcDataBuffer[64];
 
 class ADC_Init: public GenericCommand
 {
