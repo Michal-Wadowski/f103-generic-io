@@ -15,7 +15,6 @@ extern ADC_HandleTypeDef hadc1;
 extern DMA_HandleTypeDef hdma_adc1;
 
 extern uint8_t * adcDataBuffer;
-extern uint8_t * adcResponseBuffer;
 extern uint32_t adcDataBufferSize;
 
 enum ADC_Start_Mode {
@@ -38,13 +37,10 @@ public:
 
 		if (adcDataBufferSize != 0) {
 			free(adcDataBuffer);
-			free(adcResponseBuffer);
 			adcDataBuffer = NULL;
-			adcResponseBuffer = NULL;
 		}
 		if (size > 0) {
 			adcDataBuffer = (uint8_t*)malloc(size);
-			adcResponseBuffer = (uint8_t*)malloc(size);
 		}
 		adcDataBufferSize = size;
 

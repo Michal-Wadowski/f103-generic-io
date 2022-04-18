@@ -12,11 +12,10 @@
 #include <strings.h>
 
 extern uint8_t * adcDataBuffer;
-extern uint8_t * adcResponseBuffer;
+//extern uint8_t * adcResponseBuffer;
 extern uint32_t adcDataBufferSize;
 
 typedef enum {
-	COPY_DATA_ON_CONVERSION_COMPLETE,
 	READ_BUFFER
 } CommandUtils_Command;
 
@@ -31,19 +30,18 @@ public:
 				return;
 			}
 
-			isDataSending = true;
-			sendReadBufferData(adcResponseBuffer, adcDataBufferSize);
-			isDataSending = false;
-		} else if (command == COPY_DATA_ON_CONVERSION_COMPLETE) {
-			bool enable = (bool)bytesReader->popUInt8();
-
-			if (bytesReader->isOverrun()) {
-				return;
+			if (conversionNumber > conversionNumberSent) {
+				sendReadBufferData(getAdcDataPart(), adcDataBufferSize / 2);
+				conversionNumberSent = conversionNumber;
 			}
+		}
+	}
 
-			copyDataOnConversionComplete = enable;
-
-			sendResponse(COPY_DATA_ON_CONVERSION_COMPLETE);
+	static uint8_t * getAdcDataPart() {
+		if (conversionNumber & 1 == 0) {
+			return &adcDataBuffer[0];
+		} else {
+			return &adcDataBuffer[adcDataBufferSize / 2];
 		}
 	}
 
@@ -72,18 +70,16 @@ public:
 	}
 
 	static void adcConversionCompleteHandler(ADC_HandleTypeDef* hadc, uint8_t part) {
-		if (copyDataOnConversionComplete && !isDataSending) {
-			if (part == 0) {
-				memcpy(&adcResponseBuffer[0], &adcDataBuffer[0], adcDataBufferSize / 2);
-			} else {
-				memcpy(&adcResponseBuffer[adcDataBufferSize/2], &adcDataBuffer[adcDataBufferSize/2], adcDataBufferSize / 2);
-			}
+		if (part == 0) {
+			conversionNumber = (conversionNumber + 2) & ~1;
+		} else {
+			conversionNumber = conversionNumber | 1;
 		}
 	}
 
 private:
-	static bool copyDataOnConversionComplete;
-	static volatile bool isDataSending;
+	static int32_t conversionNumber;
+	static int32_t conversionNumberSent;
 };
 
 #endif /* CORE_SRC_COMMAND_COMMANDUTILS_H_ */
