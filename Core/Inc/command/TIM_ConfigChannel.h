@@ -28,7 +28,7 @@ public:
 		uint32_t ocIdleState = bytesReader->popUInt32();
 		uint32_t ocnIdleState = bytesReader->popUInt32();
 
-		if (timer >= 0 && timer <= 4 && htimEnabled[timer]) {
+		if (timer >= 0 && timer <= 3 && htimEnabled[timer]) {
 			if (mode == PWM) {
 				if (!bytesReader->isOverrun()) {
 

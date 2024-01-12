@@ -38,7 +38,7 @@ public:
 	}
 
 	static uint8_t * getAdcDataPart() {
-		if (conversionNumber & 1 == 0) {
+		if ((conversionNumber & 1) == 0) {
 			return &adcDataBuffer[0];
 		} else {
 			return &adcDataBuffer[adcDataBufferSize / 2];

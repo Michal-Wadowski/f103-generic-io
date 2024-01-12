@@ -19,7 +19,7 @@ public:
 		uint8_t timer = bytesReader->popUInt8();
 		uint8_t channel = bytesReader->popUInt8();
 
-		if (timer >= 0 && timer <= 4 && htimEnabled[timer]) {
+		if (timer >= 0 && timer <= 3 && htimEnabled[timer]) {
 
 			if (mode == PWM) {
 				if (!bytesReader->isOverrun()) {

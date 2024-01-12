@@ -17,7 +17,7 @@ public:
 		TIM_Mode mode = (TIM_Mode)bytesReader->popUInt8();
 		uint8_t timer = bytesReader->popUInt8();
 
-		if (timer >= 0 && timer <= 4 && !htimEnabled[timer]) {
+		if (timer >= 0 && timer <= 3 && !htimEnabled[timer]) {
 
 			if (mode == PWM) {
 				uint32_t prescaler = bytesReader->popUInt32();
@@ -39,6 +39,7 @@ public:
 					case 1:
 						htim[timer].Instance = TIM2;
 						__HAL_RCC_TIM2_CLK_ENABLE();
+						__HAL_AFIO_REMAP_TIM2_ENABLE();
 						break;
 					case 2:
 						htim[timer].Instance = TIM3;
