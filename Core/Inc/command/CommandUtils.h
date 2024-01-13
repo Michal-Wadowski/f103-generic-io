@@ -15,37 +15,78 @@ extern uint8_t * adcDataBuffer;
 //extern uint8_t * adcResponseBuffer;
 extern uint32_t adcDataBufferSize;
 
-typedef enum {
-	READ_BUFFER
+typedef enum
+{
+	READ_BUFFER, ALLOC_BUFFER, FREE_BUFFER
 } CommandUtils_Command;
 
 class CommandUtils: public GenericCommand
 {
 public:
-	static void receivedCommand(BytesReader * bytesReader) {
-		CommandUtils_Command command = (CommandUtils_Command)bytesReader->popUInt8();
+	static void receivedCommand(BytesReader * bytesReader)
+	{
+		CommandUtils_Command command =
+				(CommandUtils_Command) bytesReader->popUInt8();
 
-		if (command == READ_BUFFER) {
-			if (bytesReader->isOverrun()) {
+		switch (command)
+		{
+		case READ_BUFFER:
+			if (bytesReader->isOverrun())
+			{
 				return;
 			}
 
-			if (conversionNumber > conversionNumberSent) {
+			if (conversionNumber > conversionNumberSent)
+			{
 				sendReadBufferData(getAdcDataPart(), adcDataBufferSize / 2);
 				conversionNumberSent = conversionNumber;
 			}
+			break;
+
+		case ALLOC_BUFFER:
+		{
+			uint16_t size = bytesReader->popUInt16();
+
+			void * ptr = malloc(size);
+			sendAllocBufferResponse(command, ptr);
+			break;
+		}
+
+		case FREE_BUFFER:
+			void * ptr = (void*)bytesReader->popUInt32();
+			free(ptr);
+			sendResponse(command);
+			break;
 		}
 	}
 
-	static uint8_t * getAdcDataPart() {
-		if ((conversionNumber & 1) == 0) {
+	static void sendAllocBufferResponse(CommandUtils_Command command,
+			void * ptr)
+	{
+		uint8_t txBuf[16];
+
+		BytesWriter bw = BytesWriter(txBuf);
+		bw.pushUInt16(COMMAND_UTILS_RESPONSE);
+		bw.pushUInt8(command);
+		bw.pushUInt32((uint32_t) ptr);
+
+		GenericCommand::sendResponse(txBuf, bw.getTotalSize());
+	}
+
+	static uint8_t * getAdcDataPart()
+	{
+		if ((conversionNumber & 1) == 0)
+		{
 			return &adcDataBuffer[0];
-		} else {
+		}
+		else
+		{
 			return &adcDataBuffer[adcDataBufferSize / 2];
 		}
 	}
 
-	static void sendReadBufferData(uint8_t * data, uint32_t size) {
+	static void sendReadBufferData(uint8_t * data, uint32_t size)
+	{
 		uint8_t txBuf[size + 16];
 
 		BytesWriter bw = BytesWriter(txBuf);
@@ -59,7 +100,8 @@ public:
 		GenericCommand::sendResponse(txBuf, bw.getTotalSize());
 	}
 
-	static void sendResponse(CommandUtils_Command command) {
+	static void sendResponse(CommandUtils_Command command)
+	{
 		uint8_t txBuf[16];
 
 		BytesWriter bw = BytesWriter(txBuf);
@@ -69,10 +111,15 @@ public:
 		GenericCommand::sendResponse(txBuf, bw.getTotalSize());
 	}
 
-	static void adcConversionCompleteHandler(ADC_HandleTypeDef* hadc, uint8_t part) {
-		if (part == 0) {
+	static void adcConversionCompleteHandler(ADC_HandleTypeDef* hadc,
+			uint8_t part)
+	{
+		if (part == 0)
+		{
 			conversionNumber = (conversionNumber + 2) & ~1;
-		} else {
+		}
+		else
+		{
 			conversionNumber = conversionNumber | 1;
 		}
 	}
