@@ -31,6 +31,7 @@
 #include "command/NVIC_SetPriority.h"
 #include "command/NVIC_EnableIRQ.h"
 #include "command/CommandUtils.h"
+#include "command/Buffer.h"
 
 class Application
 {
@@ -55,6 +56,7 @@ public:
 		commands[NVIC_SET_PRIORITY] = NVIC_SetPriority::receivedCommand;
 		commands[NVIC_ENABLE_IRQ] = NVIC_EnableIRQ::receivedCommand;
 		commands[COMMAND_UTILS] = CommandUtils::receivedCommand;
+		commands[BUFFER] = Buffer::receivedCommand;
 	}
 
 	void usbDataReceived(uint8_t * buf, uint32_t len)

@@ -14,7 +14,8 @@
 #include "BytesReader.h"
 #include "BytesWriter.h"
 
-typedef enum {
+typedef enum
+{
 	PING_COMMAND,
 
 	WRITE_PIN,
@@ -49,10 +50,13 @@ typedef enum {
 
 	NVIC_ENABLE_IRQ,
 
-	COMMAND_UTILS
+	COMMAND_UTILS,
+
+	BUFFER
 } CommandIds;
 
-typedef enum {
+typedef enum
+{
 	PONG_COMMAND,
 
 	WRITE_PIN_RESPONSE,
@@ -87,29 +91,33 @@ typedef enum {
 
 	NVIC_ENABLE_IRQ_RESPONSE,
 
-	COMMAND_UTILS_RESPONSE
+	COMMAND_UTILS_RESPONSE,
+
+	BUFFER_RESPONSE
 } CommandResponseIds;
 
-typedef void (*receivedCommand)(BytesReader * bytesReader);
+typedef void (*receivedCommand)(BytesReader *bytesReader);
 
 extern USBD_HandleTypeDef hUsbDeviceFS;
 
 class GenericCommand
 {
 protected:
-	static void sendResponse(uint8_t * data, uint16_t size) {
-		while (CDC_Transmit_FS((uint8_t*) (data), size) != USBD_OK);
+	static void sendResponse(uint8_t *data, uint16_t size)
+	{
+		while (CDC_Transmit_FS((uint8_t *)(data), size) != USBD_OK)
+			;
 
 		// Helps if data buffer is located at stack and not heap
 		waitForTransmisionFinish();
 	}
 
-	static void sendOk(uint16_t responseCode) {
+	static void sendOk(uint16_t responseCode)
+	{
 		uint8_t txBuf[16];
 
 		BytesWriter bw = BytesWriter(txBuf);
 		bw.pushUInt16(responseCode);
-
 
 		sendResponse(txBuf, bw.getTotalSize());
 	}
@@ -117,11 +125,10 @@ protected:
 private:
 	static void waitForTransmisionFinish()
 	{
-		USBD_CDC_HandleTypeDef* hcdc =
-				(USBD_CDC_HandleTypeDef*) (hUsbDeviceFS.pClassData);
+		USBD_CDC_HandleTypeDef *hcdc =
+			(USBD_CDC_HandleTypeDef *)(hUsbDeviceFS.pClassData);
 		while (hcdc->TxState != 0)
 			;
-
 	}
 };
 
